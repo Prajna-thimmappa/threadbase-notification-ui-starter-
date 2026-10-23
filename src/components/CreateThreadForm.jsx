@@ -1,42 +1,67 @@
+
 import { useState } from "react";
 import { useMutation } from "@tanstack/react-query";
 import { useToast } from "../context/ToastContext.jsx";
-import { createThread } from "../api/mockApi.js";
+import { login } from "../api/mockApi.js";
 
-export default function CreateThreadForm() {
-  const [title, setTitle] = useState("");
+export default function LoginForm() {
+  const [username, setUsername] = useState("ada");
+  const [password, setPassword] = useState("password");
   const { showToast } = useToast();
 
   const mutation = useMutation({
-    mutationFn: createThread,
-    // TODO (Task 3): on success, fire a green toast: showToast("Thread posted!", "success")
-    onSuccess: () => {},
-    // TODO (Task 3): on error, read error.response?.data?.message (fall back to a generic
-    //   string) and fire a red toast: showToast(message, "error")
-    onError: () => {},
+    mutationFn: login,
+
+    onSuccess: () => {
+      showToast("Welcome back!", "success");
+    },
+
+    onError: (error) => {
+      const message =
+        error.response?.data?.message ||
+        "Something went wrong";
+
+      showToast(message, "error");
+    },
   });
 
   function handleSubmit(e) {
     e.preventDefault();
-    mutation.mutate({ title });
-    setTitle("");
+    mutation.mutate({ username, password });
   }
 
   return (
-    <form className="card" onSubmit={handleSubmit}>
-      <h2>Create a thread</h2>
+    <form
+      className="card"
+      onSubmit={handleSubmit}
+    >
+      <h2>Login</h2>
+
       <p className="hint">
-        Tip: the title <code>Welcome to Threadbase</code> already exists, so posting it
-        triggers a duplicate-title error.
+        Use ada / password to log in successfully.
       </p>
+
       <input
         className="input"
-        placeholder="Thread title"
-        value={title}
-        onChange={(e) => setTitle(e.target.value)}
+        placeholder="Username"
+        value={username}
+        onChange={(e) => setUsername(e.target.value)}
       />
-      <button className="btn" type="submit" disabled={mutation.isPending}>
-        {mutation.isPending ? "Posting..." : "Post thread"}
+
+      <input
+        className="input"
+        type="password"
+        placeholder="Password"
+        value={password}
+        onChange={(e) => setPassword(e.target.value)}
+      />
+
+      <button
+        className="btn"
+        type="submit"
+        disabled={mutation.isPending}
+      >
+        {mutation.isPending ? "Logging in..." : "Log in"}
       </button>
     </form>
   );
